@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Разнообразные вылетающие смайлики</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #6e8efb, #a777e3);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+    
+    .container {
+      text-align: center;
+      z-index: 10;
+    }
+    
+    h1 {
+      color: white;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      font-weight: 600;
+    }
+    
+    .face-button {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #ffcc4d;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2), 
+                  inset 0 -5px 10px #ff9d00, 
+                  inset 0 5px 10px #ffe072;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin: 0 auto;
+    }
+    
+    .face-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), 
+                  inset 0 -5px 10px #ff9d00, 
+                  inset 0 5px 10px #ffe072;
+    }
+    
+    .face-button:active {
+      transform: scale(0.95);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), 
+                  inset 0 -5px 10px #ff9d00, 
+                  inset 0 5px 10px #ffe072;
+    }
+    
+    .face-container {
+      position: relative;
+      width: 50px;
+      height: 30px;
+    }
+    
+    .eye {
+      position: absolute;
+      height: 10px;
+      width: 10px;
+      background: #2a2927;
+      border-radius: 50%;
+      box-shadow: inset 1px 2px 4px #121110;
+    }
+    
+    .eye.left {
+      left: 5px;
+    }
+    
+    .eye.right {
+      right: 5px;
+    }
+    
+    .mouth {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 6px;
+      background: #2a2927;
+      border-radius: 0 0 10px 10px;
+      box-shadow: inset 1px 2px 4px #121110;
+    }
+    
+    .smiley {
+      position: absolute;
+      font-size: 28px;
+      pointer-events: none;
+      z-index: 5;
+      opacity: 0;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .instructions {
+      color: white;
+      margin-top: 25px;
+      font-size: 18px;
+      max-width: 300px;
+      line-height: 1.4;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .counter {
+      color: white;
+      margin-top: 15px;
+      font-size: 16px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Смайликовый взрыв!</h1>
+    <button class="face-button">
+      <span class="face-container">
+        <span class="eye left"></span>
+        <span class="eye right"></span>
+        <span class="mouth"></span>
+      </span>
+    </button>
+    <p class="instructions">Нажмите на смайлик, чтобы запустить разноцветные эмодзи!</p>
+    <p class="counter">Выпущено смайликов: <span id="count">0</span></p>
+  </div>
+
+  <script>
+    const faceButton = document.querySelector('.face-button');
+    const smileyCount = document.getElementById('count');
+    let count = 0;
+    
+    // Массив разнообразных смайликов
+    const smileys = [
+      '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', 
+      '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', 
+      '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', 
+      '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏',
+      '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿',
+      '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
+      '🎈', '🎉', '🎊', '✨', '⭐', '🌟', '💫', '🎁'
+    ];
+    
+    // Массив цветов для фона смайликов
+    const colors = [
+      '#FF9AA2', '#FFB7B2', '#FFDAC1', '#E2F0CB', '#B5EAD7', 
+      '#C7CEEA', '#F8B195', '#F67280', '#C06C84', '#6C5B7B',
+      '#FFD700', '#FF6B6B', '#4ECDC4', '#556270', '#26C6DA'
+    ];
+    
+    // Обработчик клика для создания и анимации смайликов
+    faceButton.addEventListener('click', function(e) {
+      // Создаем 12 смайликов за один клик
+      for (let i = 0; i < 12; i++) {
+        createSmiley();
+      }
+      
+      // Обновляем счетчик
+      count += 12;
+      smileyCount.textContent = count;
+    });
+    
+    function createSmiley() {
+      // Создаем элемент смайлика
+      const smiley = document.createElement('div');
+      smiley.className = 'smiley';
+      
+      // Выбираем случайный смайлик
+      const randomSmiley = smileys[Math.floor(Math.random() * smileys.length)];
+      smiley.textContent = randomSmiley;
+      
+      // Случайный цвет фона
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      smiley.style.background = randomColor;
+      smiley.style.borderRadius = '50%';
+      smiley.style.width = '40px';
+      smiley.style.height = '40px';
+      smiley.style.display = 'flex';
+      smiley.style.justifyContent = 'center';
+      smiley.style.alignItems = 'center';
+      smiley.style.padding = '5px';
+      
+      // Добавляем смайлик в body
+      document.body.appendChild(smiley);
+      
+      // Получаем координаты кнопки
+      const rect = faceButton.getBoundingClientRect();
+      const buttonCenterX = rect.left + rect.width / 2;
+      const buttonCenterY = rect.top + rect.height / 2;
+      
+      // Устанавливаем начальную позицию (центр кнопки)
+      smiley.style.left = `${buttonCenterX - 20}px`;
+      smiley.style.top = `${buttonCenterY - 20}px`;
+      
+      // Случайное направление и расстояние
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 150 + Math.random() * 200;
+      const duration = 1 + Math.random() * 1.5;
+      
+      // Конечная позиция
+      const endX = Math.cos(angle) * distance;
+      const endY = Math.sin(angle) * distance;
+      
+      // Анимация смайлика
+      const startTime = Date.now();
+      
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / (duration * 1000), 1);
+        
+        // Квадратичное easing для более естественного движения
+        const easeProgress = 1 - Math.pow(1 - progress, 3);
+        
+        // Текущая позиция
+        const currentX = endX * easeProgress;
+        const currentY = endY * easeProgress;
+        
+        // Размер и прозрачность
+        const scale = 0.8 + easeProgress * 0.7;
+        const opacity = 1 - (progress * 0.8);
+        
+        // Применяем трансформации
+        smiley.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+        smiley.style.opacity = opacity;
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          // Удаляем смайлик после завершения анимации
+          document.body.removeChild(smiley);
+        }
+      }
+      
+      // Запускаем анимацию
+      requestAnimationFrame(animate);
+    }
+  </script>
+</body>
+</html>
